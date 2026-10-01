@@ -7,6 +7,10 @@ import { Door } from '../objects/Door'
 import { Piston } from '../objects/Piston'
 import { Counter } from '../objects/Counter'
 import { Water } from '../objects/Water'
+import { Waterfall } from '../objects/Waterfall'
+import { Fountain } from '../objects/Fountain'
+import { Hose } from '../objects/Hose'
+import { Turbine } from '../objects/Turbine'
 import type { PhysicsObject } from '../physics/PhysicsObject'
 import { describeObject, type ComponentDescriptor } from './descriptors'
 import type { ConnectionDescriptor } from '../logic/LogicNetwork'
@@ -136,4 +140,54 @@ function riverCrossing(): CircuitPreset {
   }
 }
 
-export const CIRCUIT_PRESETS: CircuitPreset[] = [rampAndLoop(), doorChain(), counterPiston(), simpleRace(), riverCrossing()]
+function waterfallPond(): CircuitPreset {
+  const waterfall = new Waterfall({ position: { x: -80, y: -60 }, width: 220, height: 50, angle: Math.PI / 2 })
+  const pond = new Water({ position: { x: 20, y: 60 }, width: 280, height: 70, flowSpeed: 0.0006 })
+  const fountain = new Fountain({ position: { x: 100, y: 55 }, radius: 55, strength: 0.0006 })
+  const ground = new Track({ position: { x: 300, y: 92 }, length: 260, thickness: 20 })
+  const marbles = [
+    new Marble({ position: { x: -90, y: -220 }, radius: 12 }),
+    new Marble({ position: { x: -80, y: -260 }, radius: 12, color: '#f87171' }),
+    new Marble({ position: { x: -70, y: -300 }, radius: 12, color: '#fbbf24' }),
+  ]
+
+  return {
+    id: 'cascada-estanque',
+    name: 'Cascada y estanque',
+    description: 'Una cascada cae en un estanque con una fuente decorativa, y desagua hacia una pista final. Solo para disfrutar viéndola.',
+    snapshot: buildSnapshot([waterfall, pond, fountain, ground, ...marbles]),
+  }
+}
+
+function waterPark(): CircuitPreset {
+  const start = new Track({ position: { x: -360, y: -40 }, length: 160, thickness: 20 })
+  const hose = new Hose({ position: { x: -430, y: -70 }, width: 110, height: 22, angle: 0.5 })
+  const ramp = new Ramp({ position: { x: -240, y: 10 }, length: 180, thickness: 18, angle: -0.25 })
+  const loop = new Loop({ center: { x: -90, y: 60 }, radius: 55, thickness: 13 })
+  const river = new Water({ position: { x: 90, y: 110 }, width: 260, height: 55, flowSpeed: 0.0014 })
+  const turbine = new Turbine({ position: { x: 20, y: 110 }, radius: 24, boost: 0.0018 })
+  const waterfall = new Waterfall({ position: { x: 260, y: 190 }, width: 180, height: 46, angle: Math.PI / 2 })
+  const pool = new Water({ position: { x: 360, y: 320 }, width: 240, height: 70, flowSpeed: 0.0003 })
+  const fountain = new Fountain({ position: { x: 420, y: 315 }, radius: 50, strength: 0.0005 })
+  const marbles = [
+    new Marble({ position: { x: -400, y: -120 }, radius: 11 }),
+    new Marble({ position: { x: -370, y: -150 }, radius: 11, color: '#34d399' }),
+  ]
+
+  return {
+    id: 'parque-acuatico',
+    name: 'Parque acuático',
+    description: 'Una manguera lanza las canicas a una rampa, un loop, un río con una turbina que refuerza la corriente, y una cascada final sobre una piscina con fuente.',
+    snapshot: buildSnapshot([start, hose, ramp, loop, river, turbine, waterfall, pool, fountain, ...marbles]),
+  }
+}
+
+export const CIRCUIT_PRESETS: CircuitPreset[] = [
+  rampAndLoop(),
+  doorChain(),
+  counterPiston(),
+  simpleRace(),
+  riverCrossing(),
+  waterfallPond(),
+  waterPark(),
+]

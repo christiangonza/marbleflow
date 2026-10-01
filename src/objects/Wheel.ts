@@ -55,10 +55,20 @@ export class Wheel extends PhysicsObject implements ActionTarget {
     this.pin.pointA = { x, y }
   }
 
-  /** Radius isn't editable here - resizing would mean swapping the pin constraint's body too. */
   updateProperties(patch: { color?: string; spinSpeed?: number }) {
     if (patch.color !== undefined) this.color = patch.color
     if (patch.spinSpeed !== undefined) this.spinSpeed = patch.spinSpeed
+  }
+
+  /** The pin constraint references the body directly, so swapping it just means pointing it at the new one. */
+  updateGeometry(patch: { radius?: number }) {
+    if (patch.radius === undefined || patch.radius === this.radius) return
+    this.radius = patch.radius
+    const position = { x: this.body.position.x, y: this.body.position.y }
+    const newBody = Matter.Bodies.circle(position.x, position.y, this.radius, { friction: 0.6, label: 'wheel' })
+    this.setBody(newBody)
+    this.pin.bodyB = newBody
+    this.commitInitial()
   }
 
   tick() {

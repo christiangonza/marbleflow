@@ -1,5 +1,5 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react'
-import { drawGrid } from '../../utils/grid'
+import { DEFAULT_CANVAS_BACKGROUND, drawGrid } from '../../utils/grid'
 import { snapAngle, snapPoint } from '../../utils/snap'
 import { spawnImpactBurst, spawnPulse, updateEffects } from '../../utils/particles'
 import { isSoundEnabled, playImpactSound, setSoundEnabled as applySoundEnabled } from '../../utils/audio'
@@ -23,7 +23,9 @@ import { Motor } from '../../objects/Motor'
 import { Magnet } from '../../objects/Magnet'
 import { Timer } from '../../objects/Timer'
 import { Counter } from '../../objects/Counter'
-import { Water } from '../../objects/Water'
+import { WaterZone } from '../../objects/WaterZone'
+import { Fountain } from '../../objects/Fountain'
+import { Turbine } from '../../objects/Turbine'
 import { createComponentAtPoint } from '../../editor/factory'
 import { COMPONENT_DRAG_MIME } from '../../editor/dnd'
 import { describeObject, instantiateDescriptor, type ComponentDescriptor } from '../../editor/descriptors'
@@ -45,7 +47,9 @@ import {
   IconFit,
   IconFullscreen,
   IconGridSnap,
+  IconGridView,
   IconRedo,
+  IconReset,
   IconUndo,
   IconZoomIn,
   IconZoomOut,
@@ -221,14 +225,33 @@ function snapshotObject(object: PhysicsObject): SelectedObjectInfo | null {
       target: object.target,
     }
   }
-  if (object instanceof Water) {
+  if (object instanceof WaterZone) {
+    const kind = object.type === 'water' ? 'water' : object.type === 'waterfall' ? 'waterfall' : 'hose'
     return {
-      kind: 'water',
+      kind,
       id: object.id,
       width: object.width,
       height: object.height,
       color: object.color,
       flowSpeed: object.flowSpeed,
+    }
+  }
+  if (object instanceof Fountain) {
+    return {
+      kind: 'fountain',
+      id: object.id,
+      radius: object.radius,
+      strength: object.strength,
+      color: object.color,
+    }
+  }
+  if (object instanceof Turbine) {
+    return {
+      kind: 'turbine',
+      id: object.id,
+      radius: object.radius,
+      boost: object.boost,
+      color: object.color,
     }
   }
   return null
@@ -275,6 +298,8 @@ export const WorldCanvas = forwardRef<WorldCanvasHandle, WorldCanvasProps>(funct
   const [pointerWorld, setPointerWorld] = useState({ x: 0, y: 0 })
   const [isDragging, setIsDragging] = useState(false)
   const [snap, setSnap] = useState<SnapSettings>({ grid: true, rotation: true })
+  const [showGrid, setShowGrid] = useState(true)
+  const [backgroundColor, setBackgroundColor] = useState(DEFAULT_CANVAS_BACKGROUND)
   const [followEnabled, setFollowEnabled] = useState(false)
   const [soundOn, setSoundOn] = useState(false)
   const [stats, setStats] = useState<SimulationStats>(() => ({
@@ -305,6 +330,8 @@ export const WorldCanvas = forwardRef<WorldCanvasHandle, WorldCanvasProps>(funct
   const speedRef = useRef(speed)
   const viewportRef = useRef(viewport)
   const followEnabledRef = useRef(followEnabled)
+  const showGridRef = useRef(showGrid)
+  const backgroundColorRef = useRef(backgroundColor)
   const elapsedRef = useRef(0)
 
   useEffect(() => {
@@ -319,6 +346,12 @@ export const WorldCanvas = forwardRef<WorldCanvasHandle, WorldCanvasProps>(funct
   useEffect(() => {
     followEnabledRef.current = followEnabled
   }, [followEnabled])
+  useEffect(() => {
+    showGridRef.current = showGrid
+  }, [showGrid])
+  useEffect(() => {
+    backgroundColorRef.current = backgroundColor
+  }, [backgroundColor])
 
   const emitSelectionInfo = useCallback(
     (ids: string[]) => {
@@ -467,8 +500,10 @@ export const WorldCanvas = forwardRef<WorldCanvasHandle, WorldCanvasProps>(funct
       else if (object instanceof Door) object.updateProperties(patch)
       else if (object instanceof Piston) object.updateProperties(patch)
       else if (object instanceof Fan) object.updateProperties(patch)
-      else if (object instanceof Wheel) object.updateProperties(patch)
-      else if (object instanceof Motor) {
+      else if (object instanceof Wheel) {
+        object.updateProperties(patch)
+        object.updateGeometry(patch)
+      } else if (object instanceof Motor) {
         object.updateProperties(patch)
         object.updateGeometry(patch)
       } else if (object instanceof Magnet) object.updateProperties(patch)
@@ -478,7 +513,12 @@ export const WorldCanvas = forwardRef<WorldCanvasHandle, WorldCanvasProps>(funct
       } else if (object instanceof Counter) {
         object.updateProperties(patch)
         object.updateGeometry(patch)
-      } else if (object instanceof Water) object.updateProperties(patch)
+      } else if (object instanceof WaterZone) object.updateProperties(patch)
+      else if (object instanceof Fountain) object.updateProperties(patch)
+      else if (object instanceof Turbine) {
+        object.updateProperties(patch)
+        object.updateGeometry(patch)
+      }
 
       emitSelectionInfo(ids)
     },
@@ -568,7 +608,7 @@ export const WorldCanvas = forwardRef<WorldCanvasHandle, WorldCanvasProps>(funct
         }
       }
 
-      drawGrid(ctx, activeViewport, width, height)
+      drawGrid(ctx, activeViewport, width, height, { showGrid: showGridRef.current, backgroundColor: backgroundColorRef.current })
       renderWorld(ctx, worldRef.current, alpha, activeViewport, width, height, quality, networkRef.current)
 
       if (connectingFromRef.current) {
@@ -840,7 +880,7 @@ export const WorldCanvas = forwardRef<WorldCanvasHandle, WorldCanvasProps>(funct
           activeHandleRef.current = { kind: 'rotate', objectId: object.id, center }
           return
         }
-        if (handles.scale && distance(screenPoint, handles.scale) <= HANDLE_HIT_RADIUS && !(object instanceof Wheel)) {
+        if (handles.scale && distance(screenPoint, handles.scale) <= HANDLE_HIT_RADIUS) {
           if (outline.kind === 'rect') {
             activeHandleRef.current = { kind: 'scale-length', objectId: object.id, center, angle: object.body.angle }
           } else {
@@ -925,15 +965,25 @@ export const WorldCanvas = forwardRef<WorldCanvasHandle, WorldCanvasProps>(funct
           object instanceof Door ||
           object instanceof Piston ||
           object instanceof Fan ||
-          object instanceof Water
+          object instanceof WaterZone
         ) {
           object.updateProperties({ width: newLength })
         }
       } else if (activeHandle.kind === 'scale-radius') {
         const newRadius = Math.max(16, distance(point, activeHandle.center))
         if (object instanceof ArcTrack) object.updateGeometry({ radius: newRadius })
-        else if (object instanceof Motor || object instanceof Timer || object instanceof Counter) object.updateGeometry({ radius: newRadius })
-        else if (object instanceof Magnet || object instanceof Marble) object.updateProperties({ radius: newRadius })
+        else if (
+          object instanceof Motor ||
+          object instanceof Timer ||
+          object instanceof Counter ||
+          object instanceof Wheel ||
+          object instanceof Turbine
+        ) {
+          object.updateGeometry({ radius: newRadius })
+        }
+        else if (object instanceof Magnet || object instanceof Marble || object instanceof Fountain) {
+          object.updateProperties({ radius: newRadius })
+        }
       }
 
       emitSelectionInfo(selectedIdsRef.current)
@@ -1053,6 +1103,30 @@ export const WorldCanvas = forwardRef<WorldCanvasHandle, WorldCanvasProps>(funct
         >
           <IconAngleSnap />
         </button>
+        <div className="canvas-toolbar-divider" />
+        <button
+          className={`canvas-tool-btn ${showGrid ? 'active' : ''}`}
+          title={showGrid ? 'Ocultar cuadrícula' : 'Mostrar cuadrícula'}
+          onClick={() => setShowGrid((prev) => !prev)}
+        >
+          <IconGridView />
+        </button>
+        <label className="canvas-bg-swatch" title="Color de fondo">
+          <input
+            type="color"
+            value={backgroundColor}
+            onChange={(event) => setBackgroundColor(event.target.value)}
+          />
+        </label>
+        {backgroundColor !== DEFAULT_CANVAS_BACKGROUND && (
+          <button
+            className="canvas-tool-btn"
+            title="Restablecer fondo"
+            onClick={() => setBackgroundColor(DEFAULT_CANVAS_BACKGROUND)}
+          >
+            <IconReset />
+          </button>
+        )}
         <div className="canvas-toolbar-divider" />
         <button className="canvas-tool-btn" title="Pantalla completa" onClick={handleFullscreen}>
           <IconFullscreen />

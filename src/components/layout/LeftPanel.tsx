@@ -7,6 +7,8 @@ import {
   IconCurve,
   IconDoor,
   IconFan,
+  IconFountain,
+  IconHose,
   IconLever,
   IconLoop,
   IconMagnet,
@@ -17,8 +19,10 @@ import {
   IconSensor,
   IconTimer,
   IconTrack,
+  IconTurbine,
   IconTube,
   IconWater,
+  IconWaterfall,
   IconWheel,
 } from '../ui/Icons'
 import './left-panel.css'
@@ -47,6 +51,10 @@ const ICONS: Record<ComponentDefinition['icon'], ComponentType<{ className?: str
   timer: IconTimer,
   counter: IconCounter,
   water: IconWater,
+  waterfall: IconWaterfall,
+  hose: IconHose,
+  fountain: IconFountain,
+  turbine: IconTurbine,
 }
 
 interface LeftPanelProps {

@@ -15,6 +15,11 @@ import { Magnet } from '../objects/Magnet'
 import { Timer } from '../objects/Timer'
 import { Counter } from '../objects/Counter'
 import { Water } from '../objects/Water'
+import { Waterfall } from '../objects/Waterfall'
+import { Hose } from '../objects/Hose'
+import { Fountain } from '../objects/Fountain'
+import { Turbine } from '../objects/Turbine'
+import { WaterZone } from '../objects/WaterZone'
 import { ArcTrack } from '../objects/ArcTrack'
 import { StaticBeam } from '../objects/StaticBeam'
 import { TriggerZone } from '../objects/TriggerZone'
@@ -161,7 +166,7 @@ export type ComponentDescriptor =
       target: number
     }
   | {
-      kind: 'water'
+      kind: 'water' | 'waterfall' | 'hose'
       id: string
       x: number
       y: number
@@ -170,6 +175,25 @@ export type ComponentDescriptor =
       height: number
       color: string
       flowSpeed: number
+    }
+  | {
+      kind: 'fountain'
+      id: string
+      x: number
+      y: number
+      radius: number
+      strength: number
+      color: string
+    }
+  | {
+      kind: 'turbine'
+      id: string
+      x: number
+      y: number
+      angle: number
+      radius: number
+      boost: number
+      color: string
     }
 
 /** Serializes a live PhysicsObject into a plain, JSON-safe descriptor. */
@@ -350,9 +374,10 @@ export function describeObject(object: PhysicsObject): ComponentDescriptor | nul
     }
   }
 
-  if (object instanceof Water) {
+  if (object instanceof WaterZone) {
+    const kind = object.type === 'water' ? 'water' : object.type === 'waterfall' ? 'waterfall' : 'hose'
     return {
-      kind: 'water',
+      kind,
       id: object.id,
       x: object.body.position.x,
       y: object.body.position.y,
@@ -361,6 +386,31 @@ export function describeObject(object: PhysicsObject): ComponentDescriptor | nul
       height: object.height,
       color: object.color,
       flowSpeed: object.flowSpeed,
+    }
+  }
+
+  if (object instanceof Fountain) {
+    return {
+      kind: 'fountain',
+      id: object.id,
+      x: object.body.position.x,
+      y: object.body.position.y,
+      radius: object.radius,
+      strength: object.strength,
+      color: object.color,
+    }
+  }
+
+  if (object instanceof Turbine) {
+    return {
+      kind: 'turbine',
+      id: object.id,
+      x: object.body.position.x,
+      y: object.body.position.y,
+      angle: object.body.angle,
+      radius: object.radius,
+      boost: object.boost,
+      color: object.color,
     }
   }
 
@@ -527,7 +577,9 @@ export function instantiateDescriptor(descriptor: ComponentDescriptor): PhysicsO
       })
 
     case 'water':
-      return new Water({
+    case 'waterfall':
+    case 'hose': {
+      const options = {
         id: descriptor.id,
         position: { x: descriptor.x, y: descriptor.y },
         angle: descriptor.angle,
@@ -535,6 +587,29 @@ export function instantiateDescriptor(descriptor: ComponentDescriptor): PhysicsO
         height: descriptor.height,
         color: descriptor.color,
         flowSpeed: descriptor.flowSpeed,
+      }
+      if (descriptor.kind === 'water') return new Water(options)
+      if (descriptor.kind === 'waterfall') return new Waterfall(options)
+      return new Hose(options)
+    }
+
+    case 'fountain':
+      return new Fountain({
+        id: descriptor.id,
+        position: { x: descriptor.x, y: descriptor.y },
+        radius: descriptor.radius,
+        strength: descriptor.strength,
+        color: descriptor.color,
+      })
+
+    case 'turbine':
+      return new Turbine({
+        id: descriptor.id,
+        position: { x: descriptor.x, y: descriptor.y },
+        angle: descriptor.angle,
+        radius: descriptor.radius,
+        boost: descriptor.boost,
+        color: descriptor.color,
       })
   }
 }

@@ -15,6 +15,10 @@ import { Magnet } from '../objects/Magnet'
 import { Timer } from '../objects/Timer'
 import { Counter } from '../objects/Counter'
 import { Water } from '../objects/Water'
+import { Waterfall } from '../objects/Waterfall'
+import { Hose } from '../objects/Hose'
+import { Fountain } from '../objects/Fountain'
+import { Turbine } from '../objects/Turbine'
 import type { PhysicsObject } from '../physics/PhysicsObject'
 import type { WorldPoint } from '../types/editor'
 
@@ -55,6 +59,14 @@ export function createComponentAtPoint(componentId: string, point: WorldPoint): 
       return new Counter({ position: point, radius: 24, target: 5 })
     case 'agua':
       return new Water({ position: point, width: 260, height: 70 })
+    case 'cascada':
+      return new Waterfall({ position: point, width: 220, height: 50, angle: Math.PI / 2 })
+    case 'manguera':
+      return new Hose({ position: point, width: 140, height: 24 })
+    case 'fuente':
+      return new Fountain({ position: point, radius: 70 })
+    case 'turbina':
+      return new Turbine({ position: point })
     default:
       return null
   }

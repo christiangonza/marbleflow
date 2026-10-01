@@ -13,6 +13,8 @@ interface Particle {
   maxLife: number
   color: string
   size: number
+  gravity: number
+  alpha: number
 }
 
 interface Pulse {
@@ -45,6 +47,8 @@ export function spawnImpactBurst(x: number, y: number, color: string, intensity:
       maxLife: 260 + Math.random() * 180,
       color,
       size: 1.4 + Math.random() * 1.8,
+      gravity: 0.05,
+      alpha: 1,
     })
   }
 }
@@ -53,13 +57,45 @@ export function spawnPulse(x: number, y: number, maxRadius: number, color: strin
   pulses.push({ x, y, radius: 0, maxRadius, life: 0, maxLife: 260, color })
 }
 
+/**
+ * A directional spray of droplets (fountains, hoses, waterfall mist) - a
+ * cone of particles fired along `directionAngle` with some spread, falling
+ * under gravity like real water.
+ */
+export function spawnSpray(
+  x: number,
+  y: number,
+  color: string,
+  directionAngle: number,
+  spreadRadians: number,
+  count: number,
+) {
+  for (let i = 0; i < count; i++) {
+    if (particles.length >= MAX_PARTICLES) break
+    const angle = directionAngle + (Math.random() - 0.5) * spreadRadians
+    const speed = 1.2 + Math.random() * 1.8
+    particles.push({
+      x,
+      y,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
+      life: 0,
+      maxLife: 420 + Math.random() * 300,
+      color,
+      size: 1 + Math.random() * 1.6,
+      gravity: 0.1,
+      alpha: 0.85,
+    })
+  }
+}
+
 export function updateEffects(deltaMs: number) {
   particles = particles.filter((particle) => {
     particle.life += deltaMs
     if (particle.life >= particle.maxLife) return false
     particle.x += particle.vx
     particle.y += particle.vy
-    particle.vy += 0.05
+    particle.vy += particle.gravity
     return true
   })
 
@@ -74,7 +110,7 @@ export function updateEffects(deltaMs: number) {
 export function renderEffects(ctx: CanvasRenderingContext2D) {
   particles.forEach((particle) => {
     const t = particle.life / particle.maxLife
-    ctx.globalAlpha = 1 - t
+    ctx.globalAlpha = (1 - t) * particle.alpha
     ctx.fillStyle = particle.color
     ctx.beginPath()
     ctx.arc(particle.x, particle.y, particle.size * (1 - t * 0.5), 0, Math.PI * 2)

@@ -32,7 +32,11 @@ const KIND_LABELS: Record<string, string> = {
   magnet: 'Imán',
   timer: 'Temporizador',
   counter: 'Contador',
-  water: 'Agua',
+  water: 'Río',
+  waterfall: 'Cascada',
+  hose: 'Manguera',
+  fountain: 'Fuente',
+  turbine: 'Turbina',
 }
 
 function toDegrees(radians: number) {
@@ -506,6 +510,14 @@ export function RightPanel({ selectedInfo, onDelete, onDuplicate, onPropertyChan
         {selectedInfo.kind === 'wheel' && (
           <>
             <NumberField
+              label="Radio"
+              value={Math.round(selectedInfo.radius)}
+              min={14}
+              max={80}
+              onChange={(v) => onPropertyChange({ radius: v })}
+              onCommit={onCommitHistory}
+            />
+            <NumberField
               label="Velocidad"
               value={selectedInfo.spinSpeed}
               step={0.05}
@@ -614,7 +626,7 @@ export function RightPanel({ selectedInfo, onDelete, onDuplicate, onPropertyChan
           </>
         )}
 
-        {selectedInfo.kind === 'water' && (
+        {(selectedInfo.kind === 'water' || selectedInfo.kind === 'waterfall' || selectedInfo.kind === 'hose') && (
           <>
             <NumberField
               label="Longitud"
@@ -643,6 +655,53 @@ export function RightPanel({ selectedInfo, onDelete, onDuplicate, onPropertyChan
             />
             <ColorField value={selectedInfo.color} onChange={(v) => onPropertyChange({ color: v })} onCommit={onCommitHistory} />
             <p className="property-hint">Las canicas más pesadas resisten mejor la corriente y flotan menos.</p>
+          </>
+        )}
+
+        {selectedInfo.kind === 'fountain' && (
+          <>
+            <NumberField
+              label="Radio de alcance"
+              value={Math.round(selectedInfo.radius)}
+              min={30}
+              max={250}
+              onChange={(v) => onPropertyChange({ radius: v })}
+              onCommit={onCommitHistory}
+            />
+            <NumberField
+              label="Fuerza"
+              value={selectedInfo.strength}
+              step={0.0001}
+              min={0.0001}
+              max={0.005}
+              onChange={(v) => onPropertyChange({ strength: v })}
+              onCommit={onCommitHistory}
+            />
+            <ColorField value={selectedInfo.color} onChange={(v) => onPropertyChange({ color: v })} onCommit={onCommitHistory} />
+          </>
+        )}
+
+        {selectedInfo.kind === 'turbine' && (
+          <>
+            <NumberField
+              label="Radio"
+              value={Math.round(selectedInfo.radius)}
+              min={14}
+              max={70}
+              onChange={(v) => onPropertyChange({ radius: v })}
+              onCommit={onCommitHistory}
+            />
+            <NumberField
+              label="Impulso"
+              value={selectedInfo.boost}
+              step={0.0001}
+              min={0.0001}
+              max={0.005}
+              onChange={(v) => onPropertyChange({ boost: v })}
+              onCommit={onCommitHistory}
+            />
+            <ColorField value={selectedInfo.color} onChange={(v) => onPropertyChange({ color: v })} onCommit={onCommitHistory} />
+            <p className="property-hint">Gírala para apuntar la corriente; colócala dentro del agua para acelerarla.</p>
           </>
         )}
 

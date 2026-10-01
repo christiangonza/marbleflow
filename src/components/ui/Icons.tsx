@@ -186,6 +186,18 @@ export function IconRedo(props: IconProps) {
   )
 }
 
+export function IconGridView(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <rect x="3" y="3" width="18" height="18" rx="2" />
+      <path d="M3 9 h18" />
+      <path d="M3 15 h18" />
+      <path d="M9 3 v18" />
+      <path d="M15 3 v18" />
+    </svg>
+  )
+}
+
 export function IconGridSnap(props: IconProps) {
   return (
     <svg {...base(props)}>
@@ -372,6 +384,54 @@ export function IconWater(props: IconProps) {
       <path d="M3 9 C5 7 7 11 9 9 C11 7 13 11 15 9 C17 7 19 11 21 9" />
       <path d="M3 14 C5 12 7 16 9 14 C11 12 13 16 15 14 C17 12 19 16 21 14" strokeOpacity={0.5} />
       <path d="M3 19 C5 17 7 21 9 19 C11 17 13 21 15 19 C17 17 19 21 21 19" strokeOpacity={0.25} />
+    </svg>
+  )
+}
+
+export function IconWaterfall(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d="M5 3 h14 v6 c0 1 -1 2 -2 2 H7 c-1 0 -2 -1 -2 -2 Z" />
+      <path d="M8 13 v4" />
+      <path d="M12 13 v6" />
+      <path d="M16 13 v4" />
+      <path d="M4 20 h16" strokeOpacity={0.5} />
+    </svg>
+  )
+}
+
+export function IconHose(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d="M4 6 C4 10 10 6 10 10 C10 14 16 10 16 14" />
+      <rect x="16" y="11" width="4" height="6" rx="1" />
+      <path d="M20 13 h2" strokeOpacity={0.5} />
+      <path d="M20 15 h2" strokeOpacity={0.3} />
+    </svg>
+  )
+}
+
+export function IconFountain(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d="M12 3 v7" />
+      <path d="M9 6 C9 8 9 9 9.5 10" strokeOpacity={0.5} />
+      <path d="M15 6 C15 8 15 9 14.5 10" strokeOpacity={0.5} />
+      <ellipse cx="12" cy="15" rx="8" ry="3" />
+      <path d="M4 15 v2 c0 1.7 3.6 3 8 3 s8 -1.3 8 -3 v-2" />
+    </svg>
+  )
+}
+
+export function IconTurbine(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <circle cx="12" cy="12" r="8" />
+      <path d="M12 5 C12 8 12 10 12 12" />
+      <path d="M19 12 C16 12 14 12 12 12" />
+      <path d="M12 19 C12 16 12 14 12 12" />
+      <path d="M5 12 C8 12 10 12 12 12" />
+      <path d="M16 16 L19 19" strokeOpacity={0.5} />
     </svg>
   )
 }

@@ -18,6 +18,10 @@ export type ComponentIconKey =
   | 'timer'
   | 'counter'
   | 'water'
+  | 'waterfall'
+  | 'hose'
+  | 'fountain'
+  | 'turbine'
 
 export interface ComponentDefinition {
   id: string
@@ -181,12 +185,28 @@ export interface SelectedCounterInfo {
 }
 
 export interface SelectedWaterInfo {
-  kind: 'water'
+  kind: 'water' | 'waterfall' | 'hose'
   id: string
   width: number
   height: number
   color: string
   flowSpeed: number
+}
+
+export interface SelectedFountainInfo {
+  kind: 'fountain'
+  id: string
+  radius: number
+  strength: number
+  color: string
+}
+
+export interface SelectedTurbineInfo {
+  kind: 'turbine'
+  id: string
+  radius: number
+  boost: number
+  color: string
 }
 
 export interface SelectedMultiInfo {
@@ -210,6 +230,8 @@ export type SelectedObjectInfo =
   | SelectedTimerInfo
   | SelectedCounterInfo
   | SelectedWaterInfo
+  | SelectedFountainInfo
+  | SelectedTurbineInfo
   | SelectedMultiInfo
 
 export interface SnapSettings {
@@ -241,4 +263,5 @@ export interface PropertyPatch {
   participant?: Participant | null
   density?: number
   flowSpeed?: number
+  boost?: number
 }
