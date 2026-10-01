@@ -1,0 +1,127 @@
+:root {
+  --bg-app: #0a0e17;
+  --bg-panel: #10151f;
+  --bg-panel-alt: #151b28;
+  --bg-panel-translucent: rgba(16, 21, 31, 0.85);
+  --bg-canvas: #0a0f1a;
+  --bg-hover: #1c2432;
+  --bg-active: #212a3a;
+
+  --border-subtle: #1f2634;
+  --border-strong: #2c3648;
+
+  --text-primary: #eef1f6;
+  --text-secondary: #94a1b8;
+  --text-tertiary: #5c6a82;
+
+  --accent: #3b82f6;
+  --accent-hover: #2f6fe0;
+  --accent-2: #6366f1;
+  --accent-soft: rgba(59, 130, 246, 0.14);
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+
+  --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.35);
+
+  --sans: 'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
+
+  color-scheme: dark;
+  font-family: var(--sans);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--bg-app);
+  color: var(--text-primary);
+  overflow: hidden;
+}
+
+button {
+  font-family: inherit;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 10px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease, color 0.15s ease;
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.btn-ghost {
+  background: transparent;
+  border-color: var(--border-subtle);
+  color: var(--text-secondary);
+}
+
+.btn-ghost:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+  border-color: var(--border-strong);
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: white;
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.3);
+}
+
+.btn-primary:hover {
+  background: var(--accent-hover);
+}
+
+.btn-danger {
+  background: transparent;
+  border-color: rgba(248, 113, 113, 0.4);
+  color: #f87171;
+}
+
+.btn-danger:hover {
+  background: rgba(248, 113, 113, 0.12);
+  border-color: #f87171;
+}
